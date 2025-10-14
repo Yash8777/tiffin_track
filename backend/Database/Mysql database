@@ -1,0 +1,52 @@
+-- Create database
+CREATE DATABASE IF NOT EXISTS tiffin_db;
+USE tiffin_db;
+
+-- Users table
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('VENDOR', 'CUSTOMER') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tiffins table
+CREATE TABLE tiffins (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vendor_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    photo_url VARCHAR(500),
+    location VARCHAR(255) NOT NULL,
+    price DOUBLE NOT NULL,
+    veg_nonveg ENUM('VEG', 'NON_VEG') NOT NULL,
+    subscription_type ENUM('DAILY', 'WEEKLY', 'MONTHLY') NOT NULL,
+    availability BOOLEAN DEFAULT TRUE,
+    contact_number VARCHAR(15) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (vendor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Bookings table
+CREATE TABLE bookings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tiffin_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    subscription_plan VARCHAR(50) NOT NULL,
+    address TEXT NOT NULL,
+    contact_number VARCHAR(15) NOT NULL,
+    payment_status ENUM('PENDING', 'PAID') DEFAULT 'PENDING',
+    free_trial BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tiffin_id) REFERENCES tiffins(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Indexes for better performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_tiffins_vendor ON tiffins(vendor_id);
+CREATE INDEX idx_tiffins_availability ON tiffins(availability);
+CREATE INDEX idx_bookings_customer ON bookings(customer_id);
+CREATE INDEX idx_bookings_tiffin ON bookings(tiffin_id);
